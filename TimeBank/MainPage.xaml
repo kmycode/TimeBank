@@ -5,9 +5,29 @@
     xmlns:local="using:TimeBank"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:TimeBank.ViewModels"
     mc:Ignorable="d">
 
+    <Page.DataContext>
+        <vm:MainViewModel/>
+    </Page.DataContext>
+    
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
+        <StackPanel>
+            <ToggleButton Content="タイマーを有効にする" FontSize="24"
+                          IsEnabled="{Binding CanToggleIsWorking.Value}"
+                          IsChecked="{Binding IsWorking.Value,Mode=TwoWay}"/>
+            <TextBlock Text="{Binding CurrentSeconds.Value}" FontSize="48"/>
+            <ListBox SelectedItem="{Binding CurrentWork.Value,Mode=TwoWay}"
+                     ItemsSource="{Binding Works}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel>
+                            <TextBlock Text="{Binding Name}"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </StackPanel>
     </Grid>
 </Page>

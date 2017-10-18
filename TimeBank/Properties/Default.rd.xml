@@ -25,7 +25,7 @@
     
     
     <!--ここに、アプリケーション固有ランタイム ディレクティブを追加します。-->
-
+    <Type Name="System.Collections.ArrayList" Dynamic="Required All" />
 
   </Application>
 </Directives>
