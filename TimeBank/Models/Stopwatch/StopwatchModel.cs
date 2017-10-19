@@ -76,7 +76,7 @@ namespace TimeBank.Models.Stopwatch
 
             if (work == null)
             {
-                this.CurrentSeconds.Value = 0;
+                this.CurrentSeconds.Value = this.TodaySeconds.Value = this.YesterdaySeconds.Value = 0;
             }
             else
             {
