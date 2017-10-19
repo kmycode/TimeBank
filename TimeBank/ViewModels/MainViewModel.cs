@@ -20,6 +20,8 @@ namespace TimeBank.ViewModels
 
         public ReactiveProperty<int> CurrentSeconds => this.stopwatch.CurrentSeconds;
 
+        public ReactiveProperty<int> TodaySeconds => this.stopwatch.TodaySeconds;
+
         public ReactiveProperty<Work> CurrentWork => this.stopwatch.CurrentWork;
 
         public ReactiveProperty<bool> CanToggleIsWorking { get; }
@@ -29,6 +31,10 @@ namespace TimeBank.ViewModels
         public MainViewModel()
         {
             this.CanToggleIsWorking = this.CurrentWork.Select(work => work != null).ToReactiveProperty();
+
+            this.works.Loaded += this.stopwatch.OnWorksLoaded;
+
+            this.works.Initialize();
         }
     }
 }

@@ -6,28 +6,61 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:TimeBank.ViewModels"
+    xmlns:cv="using:TimeBank.Converters"
     mc:Ignorable="d">
 
     <Page.DataContext>
         <vm:MainViewModel/>
     </Page.DataContext>
+
+    <Page.Resources>
+        <cv:NegativeConverter x:Key="NegativeConv"/>
+    </Page.Resources>
     
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <StackPanel>
-            <ToggleButton Content="タイマーを有効にする" FontSize="24"
-                          IsEnabled="{Binding CanToggleIsWorking.Value}"
-                          IsChecked="{Binding IsWorking.Value,Mode=TwoWay}"/>
-            <TextBlock Text="{Binding CurrentSeconds.Value}" FontSize="48"/>
-            <ListBox SelectedItem="{Binding CurrentWork.Value,Mode=TwoWay}"
-                     ItemsSource="{Binding Works}">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel>
-                            <TextBlock Text="{Binding Name}"/>
-                        </StackPanel>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="300"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <ListBox Grid.Column="0"
+                 ItemsSource="{Binding Works}"
+                 SelectedItem="{Binding CurrentWork.Value,Mode=TwoWay}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel>
+                        <TextBlock Text="{Binding Name}"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <StackPanel Grid.Column="1">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <!--停止-->
+                <ToggleButton IsChecked="{Binding IsWorking.Value,Mode=TwoWay,Converter={StaticResource NegativeConv}}">
+                    <FontIcon Glyph="&#xE769;"  FontFamily="Segoe MDL2 Assets" FontSize="24"/>
+                </ToggleButton>
+                <!--再生-->
+                <ToggleButton IsEnabled="{Binding CanToggleIsWorking.Value}"
+                              IsChecked="{Binding IsWorking.Value,Mode=TwoWay}">
+                    <FontIcon Glyph="&#xE768;"  FontFamily="Segoe MDL2 Assets" FontSize="24"/>
+                </ToggleButton>
+            </StackPanel>
+            <Grid ColumnSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Column="0" Grid.Row="0" Text="Total:" TextAlignment="Right"
+                           FontSize="32" VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="1" Grid.Row="0" Text="{Binding CurrentSeconds.Value}" FontSize="80"/>
+                <TextBlock Grid.Column="0" Grid.Row="1" Text="Today:" TextAlignment="Right"
+                           FontSize="24" VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="1" Grid.Row="1" Text="{Binding TodaySeconds.Value}" FontSize="48"/>
+            </Grid>
         </StackPanel>
     </Grid>
 </Page>

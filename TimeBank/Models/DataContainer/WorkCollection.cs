@@ -15,8 +15,9 @@ namespace TimeBank.Models.DataContainer
 
         private WorkCollection()
         {
-            this.LoadWorks();
         }
+
+        public void Initialize() => this.LoadWorks();
 
         /// <summary>
         /// ワークをデータベースからロードする
@@ -45,6 +46,8 @@ namespace TimeBank.Models.DataContainer
             // DBの内容をメモリに記録
             this.ClearOnScheduler();
             this.AddRangeOnScheduler(works);
+
+            this.Loaded?.Invoke(this, new WorksLoadedEventArgs { Works = works, });
         }
 
         /// <summary>
@@ -74,5 +77,12 @@ namespace TimeBank.Models.DataContainer
                 db.Works.UpdateRange(this);
             }
         }
+
+        public event EventHandler<WorksLoadedEventArgs> Loaded;
+    }
+
+    class WorksLoadedEventArgs : EventArgs
+    {
+        public IEnumerable<Work> Works { get; set; }
     }
 }

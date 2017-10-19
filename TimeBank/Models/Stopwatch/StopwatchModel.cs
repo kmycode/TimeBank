@@ -8,6 +8,7 @@ using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TimeBank.Models.Data.MainContext;
+using TimeBank.Models.DataContainer;
 
 namespace TimeBank.Models.Stopwatch
 {
@@ -48,6 +49,16 @@ namespace TimeBank.Models.Stopwatch
             // ワークを切り替えたら現在の秒数も切り替える
             this.CurrentWork
                 .Subscribe(this.OnCurrentWorkChanged);
+        }
+
+        /// <summary>
+        /// ワーク一覧がロードされた時に呼び出す
+        /// </summary>
+        /// <param name="sender">イベント発生元</param>
+        /// <param name="e">イベントパラメータ</param>
+        public void OnWorksLoaded(object sender, WorksLoadedEventArgs e)
+        {
+            this.CurrentWork.Value = e.Works.FirstOrDefault();
         }
 
         /// <summary>
