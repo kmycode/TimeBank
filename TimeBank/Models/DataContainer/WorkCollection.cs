@@ -18,6 +18,9 @@ namespace TimeBank.Models.DataContainer
             this.LoadWorks();
         }
 
+        /// <summary>
+        /// ワークをデータベースからロードする
+        /// </summary>
         private void LoadWorks()
         {
             IEnumerable<Work> getWorks(MainContext db)
@@ -44,6 +47,10 @@ namespace TimeBank.Models.DataContainer
             this.AddRangeOnScheduler(works);
         }
 
+        /// <summary>
+        /// デフォルト（プリセット）のワークデータを書き込む
+        /// </summary>
+        /// <param name="db">データベース</param>
         private void SaveDefaultWorks(MainContext db)
         {
             db.Works.Add(new Work
@@ -57,6 +64,9 @@ namespace TimeBank.Models.DataContainer
             db.SaveChanges();
         }
 
+        /// <summary>
+        /// すべてのワークを保存する
+        /// </summary>
         private void Save()
         {
             using (var db = new MainContext())

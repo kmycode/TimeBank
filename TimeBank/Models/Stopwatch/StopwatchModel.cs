@@ -28,53 +28,81 @@ namespace TimeBank.Models.Stopwatch
         /// </summary>
         public ReactiveProperty<int> CurrentSeconds { get; } = new ReactiveProperty<int>();
 
+        /// <summary>
+        /// 今日の経過秒数
+        /// </summary>
+        public ReactiveProperty<int> TodaySeconds { get; } = new ReactiveProperty<int>();
+
         public StopwatchModel()
         {
             // １秒ごとに処理する
             Observable.Interval(new TimeSpan(0, 0, 1))
-                .Where(time => this.CurrentWork.Value != null)
-                .Where(time => this.IsWorking.Value)
-                .Subscribe(time => this.CurrentSeconds.Value++);
+                .Where(time => this.CurrentWork.Value != null && this.IsWorking.Value)
+                .Subscribe(time => this.StepSeconds());
 
             // １０秒ごとにデータを保存する
-            this.CurrentSeconds
-                .Where(time => time % 10 == 0)
-                .Where(time => this.CurrentWork.Value != null)
-                .Subscribe(time => this.Save());
+            this.TodaySeconds
+                .Where(time => this.CurrentWork.Value != null && time % 10 == 0)
+                .Subscribe(time => this.SaveSeconds());
 
             // ワークを切り替えたら現在の秒数も切り替える
             this.CurrentWork
                 .Subscribe(this.OnCurrentWorkChanged);
         }
 
+        /// <summary>
+        /// 現在のワークが変更された時に呼び出される
+        /// </summary>
+        /// <param name="work">新しいワーク</param>
         private void OnCurrentWorkChanged(Work work)
         {
+            this.IsWorking.Value = false;
+
             if (work == null)
             {
-                this.IsWorking.Value = false;
                 this.CurrentSeconds.Value = 0;
             }
             else
             {
                 using (var db = new MainContext())
                 {
-                    this.CurrentSeconds.Value = this.GetCurrentSeconds(db);
+                    // 秒数を取得する
+                    this.CurrentSeconds.Value = db.WorkTimes.Where(wt => wt.WorkId == this.CurrentWork.Value.Id)
+                                                            .Sum(wt => wt.DoneSeconds);
+                    this.TodaySeconds.Value = this.GetTodayWorkTime(db).DoneSeconds;
                 }
             }
         }
 
-        private void Save()
+        /// <summary>
+        /// データを１秒分進める
+        /// </summary>
+        private void StepSeconds()
+        {
+            this.CurrentSeconds.Value++;
+            this.TodaySeconds.Value++;
+        }
+
+        /// <summary>
+        /// ワークで稼働した秒数を保存する
+        /// </summary>
+        private void SaveSeconds()
         {
             using (var db = new MainContext())
             {
-                var workTime = this.GetCurrentWorkTime(db);
+                var workTime = this.GetTodayWorkTime(db);
 
-                workTime.DoneSeconds = this.CurrentSeconds.Value;
+                workTime.DoneSeconds = this.TodaySeconds.Value;
                 db.SaveChanges();
             }
         }
 
-        private WorkTime GetCurrentWorkTime(MainContext db)
+        /// <summary>
+        /// 今日の分のワークデータを取得する
+        /// </summary>
+        /// <param name="db">データベース</param>
+        /// <returns>今日の分のワークデータ</returns>
+        private WorkTime GetTodayWorkTime(MainContext db)
         {
             var now = DateTime.Now;
             var workTime = db.WorkTimes.Where(wt => wt.Year == now.Year &&
@@ -96,13 +124,6 @@ namespace TimeBank.Models.Stopwatch
             }
 
             return workTime;
-        }
-
-        private int GetCurrentSeconds(MainContext db)
-        {
-            var workTimes = db.WorkTimes.Where(wt => wt.WorkId == this.CurrentWork.Value.Id)
-                                        .Sum(wt => wt.DoneSeconds);
-            return workTimes;
         }
     }
 }
