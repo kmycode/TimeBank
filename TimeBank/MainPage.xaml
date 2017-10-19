@@ -22,6 +22,8 @@
             <ColumnDefinition Width="300"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
+        
+        <!--左カラム-->
         <ListBox Grid.Column="0"
                  ItemsSource="{Binding Works}"
                  SelectedItem="{Binding CurrentWork.Value,Mode=TwoWay}">
@@ -33,6 +35,8 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
+        
+        <!--右カラム-->
         <StackPanel Grid.Column="1">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <!--停止-->
@@ -53,6 +57,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition/>
                     <RowDefinition/>
+                    <RowDefinition/>
                 </Grid.RowDefinitions>
                 <TextBlock Grid.Column="0" Grid.Row="0" Text="Total:" TextAlignment="Right"
                            FontSize="32" VerticalAlignment="Center"/>
@@ -60,6 +65,9 @@
                 <TextBlock Grid.Column="0" Grid.Row="1" Text="Today:" TextAlignment="Right"
                            FontSize="24" VerticalAlignment="Center"/>
                 <TextBlock Grid.Column="1" Grid.Row="1" Text="{Binding TodaySeconds.Value}" FontSize="48"/>
+                <TextBlock Grid.Column="0" Grid.Row="2" Text="Yesterday:" TextAlignment="Right"
+                           FontSize="24" VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="1" Grid.Row="2" Text="{Binding YesterdaySeconds.Value}" FontSize="48"/>
             </Grid>
         </StackPanel>
     </Grid>

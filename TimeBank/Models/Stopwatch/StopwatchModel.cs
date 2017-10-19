@@ -34,6 +34,11 @@ namespace TimeBank.Models.Stopwatch
         /// </summary>
         public ReactiveProperty<int> TodaySeconds { get; } = new ReactiveProperty<int>();
 
+        /// <summary>
+        /// 昨日の経過秒数
+        /// </summary>
+        public ReactiveProperty<int> YesterdaySeconds { get; } = new ReactiveProperty<int>();
+
         public StopwatchModel()
         {
             // １秒ごとに処理する
@@ -81,6 +86,7 @@ namespace TimeBank.Models.Stopwatch
                     this.CurrentSeconds.Value = db.WorkTimes.Where(wt => wt.WorkId == this.CurrentWork.Value.Id)
                                                             .Sum(wt => wt.DoneSeconds);
                     this.TodaySeconds.Value = this.GetTodayWorkTime(db).DoneSeconds;
+                    this.YesterdaySeconds.Value = this.GetWorkTime(db, DateTime.Now.AddDays(-1))?.DoneSeconds ?? 0;
                 }
             }
         }
@@ -116,11 +122,7 @@ namespace TimeBank.Models.Stopwatch
         private WorkTime GetTodayWorkTime(MainContext db)
         {
             var now = DateTime.Now;
-            var workTime = db.WorkTimes.Where(wt => wt.Year == now.Year &&
-                                                    wt.Month == now.Month &&
-                                                    wt.Day == now.Day &&
-                                                    wt.WorkId == this.CurrentWork.Value.Id)
-                                        .SingleOrDefault();
+            var workTime = this.GetWorkTime(db, now);
 
             if (workTime == null)
             {
@@ -134,6 +136,22 @@ namespace TimeBank.Models.Stopwatch
                 db.WorkTimes.Add(workTime);
             }
 
+            return workTime;
+        }
+
+        /// <summary>
+        /// 指定日付のワークデータを取得する
+        /// </summary>
+        /// <param name="db">データベース</param>
+        /// <param name="dt">日付</param>
+        /// <returns>指定日付のワークデータ</returns>
+        private WorkTime GetWorkTime(MainContext db, DateTime dt)
+        {
+            var workTime = db.WorkTimes.Where(wt => wt.Year == dt.Year &&
+                                        wt.Month == dt.Month &&
+                                        wt.Day == dt.Day &&
+                                        wt.WorkId == this.CurrentWork.Value.Id)
+                            .SingleOrDefault();
             return workTime;
         }
     }
