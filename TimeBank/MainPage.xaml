@@ -38,6 +38,8 @@
         
         <!--右カラム-->
         <StackPanel Grid.Column="1">
+            <TextBlock Text="{Binding CurrentWork.Value.Name}" FontSize="48" Margin="0,8,0,8"
+                       TextAlignment="Center"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <!--停止-->
                 <ToggleButton IsChecked="{Binding IsWorking.Value,Mode=TwoWay,Converter={StaticResource NegativeConv}}">
