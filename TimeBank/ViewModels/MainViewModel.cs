@@ -24,11 +24,11 @@ namespace TimeBank.ViewModels
 
         public ReactiveProperty<int> YesterdaySeconds => this.stopwatch.YesterdaySeconds;
 
-        public ReactiveProperty<Work> CurrentWork => this.stopwatch.CurrentWork;
+        public ReactiveProperty<WorkItem> CurrentWork => this.stopwatch.CurrentWork;
 
         public ReactiveProperty<bool> CanToggleIsWorking { get; }
 
-        public ReactiveCollection<Work> Works => this.works;
+        public ReactiveCollection<WorkItem> Works => this.works;
 
         public MainViewModel()
         {

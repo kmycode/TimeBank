@@ -4,11 +4,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TimeBank.Models.Data;
 using TimeBank.Models.Data.MainContext;
 
 namespace TimeBank.Models.DataContainer
 {
-    class WorkCollection : ReactiveCollection<Work>
+    class WorkCollection : ReactiveCollection<WorkItem>
     {
         public static WorkCollection Instance => _instance ?? (_instance = new WorkCollection());
         private static WorkCollection _instance;
@@ -24,30 +25,40 @@ namespace TimeBank.Models.DataContainer
         /// </summary>
         private void LoadWorks()
         {
-            IEnumerable<Work> getWorks(MainContext db)
+            int initializersCount = 0;
+            ref IWorkItemInitializer getInitializerRef(IWorkItemInitializer[] initializerArray)
             {
-                var wks = db.Works.ToArray();
-                db.Works.AttachRange(wks);
-                return wks;
+                return ref initializerArray[initializersCount++];
             };
 
             // DBからロード
-            IEnumerable<Work> works;
-            using (var db = new MainContext())
+            IEnumerable<Work> works = default;
+            DbAccess.MainContext(db =>
             {
-                works = getWorks(db);
-                if (!works.Any())
+                if (!db.Works.Any())
                 {
                     this.SaveDefaultWorks(db);
-                    works = getWorks(db);
                 }
-            }
+
+                works = db.Works.ToArray();
+            });
 
             // DBの内容をメモリに記録
+            var initializers = new IWorkItemInitializer[works.Count()];
+            var items = works.Select(w => new WorkItem(w, out getInitializerRef(initializers))).ToArray();
             this.ClearOnScheduler();
-            this.AddRangeOnScheduler(works);
+            this.AddRangeOnScheduler(items);
 
-            this.Loaded?.Invoke(this, new WorksLoadedEventArgs { Works = works, });
+            // 各アイテムを初期化
+            DbAccess.MainContext(db =>
+            {
+                foreach (var init in initializers)
+                {
+                    init.Initialize(db);
+                }
+            });
+
+            this.Loaded?.Invoke(this, new WorksLoadedEventArgs { Works = works, WorkItems = items, });
         }
 
         /// <summary>
@@ -74,7 +85,7 @@ namespace TimeBank.Models.DataContainer
         {
             using (var db = new MainContext())
             {
-                db.Works.UpdateRange(this);
+                db.Works.UpdateRange(this.Select(item => item.Work.Value));
             }
         }
 
@@ -84,5 +95,6 @@ namespace TimeBank.Models.DataContainer
     class WorksLoadedEventArgs : EventArgs
     {
         public IEnumerable<Work> Works { get; set; }
+        public IEnumerable<WorkItem> WorkItems { get; set; }
     }
 }
