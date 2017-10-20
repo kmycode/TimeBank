@@ -91,6 +91,7 @@ namespace TimeBank.Models.DataContainer
                     WorkId = this.Work.Value.Id,
                 };
                 db.WorkTimes.Add(workTime);
+                db.SaveChanges();
             }
 
             return workTime;
